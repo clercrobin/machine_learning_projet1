@@ -10,4 +10,16 @@ def standardize(x, mean=None, std=None):
 
 def build_poly(x, degree):
     """polynomial basis functions for input data x, for j=0 up to j=degree."""
-    return np.column_stack([np.power(x, i) for i in range(1,degree+1)])
+    
+    poly_basis = np.column_stack([np.power(x, i) for i in range(1,degree+1)])
+
+    # Cross terms
+    indices_i = np.array(np.sum([[i for j in range(i)] for i in range(x.shape[1])]))
+    indices_j = np.array(np.sum([[j for j in range(i)] for i in range(x.shape[1])]))
+    cross_terms = x[:,indices_i] * x[:,indices_j]
+    x = np.hstack((poly_basis, cross_terms))
+    
+    # Add a bias term
+    x = np.c_[np.ones(len(x)), x]
+    
+    return x
