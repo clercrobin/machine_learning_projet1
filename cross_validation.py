@@ -1,39 +1,18 @@
-from costs import compute_loss
-from ridge_regression import ridge_regression
-from build_polynomial import build_poly
 import numpy as np
+from implementations import ridge_regression, compute_mse
 
-
-def cross_validation(y, x, k_indices, k, lambda_, degree):
-    """return the loss of ridge regression."""
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # get k'th subgroup in test, others in train: TODO
-    # ***************************************************
-    all_indices = np.arange(y.shape[0])
-    excepted = np.setdiff1d(all_indices,k_indices[k])
-    x_test = x[k_indices[k]]
-    y_test = y[k_indices[k]]
-    x_train = x[excepted]
-    y_train = y[excepted]
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # form data with polynomial degree: TODO
-    # ***************************************************
-    x_train_extended = build_poly(x_train, degree)
-    #print(x_train_extended.shape)
-    x_test_extended = build_poly(x_test, degree)
-    #print(x_test_extended.shape)
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # ridge regression: TODO
-    # ***************************************************
-    loss_tr,w_tr = ridge_regression(y_train,x_train_extended,lambda_)
-    #print("One new regression")
-    #print(w_tr)
-    loss_te = compute_loss(y_test,x_test_extended,w_tr)
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # calculate the loss for train and test data: TODO
-    # ***************************************************
-    return loss_tr, loss_te
+def split_data(x, y, ratio, seed=1):
+    """
+    split the dataset based on the split ratio. If ratio is 0.8 
+    you will have 80% of your data set dedicated to training 
+    and the rest dedicated to testing
+    """
+    # set seed yes because of the gender
+    np.random.seed(seed)
+    indexes_shuffled = np.random.shuffle(np.arange(y.shape[0]))
+    threshold = round(ratio*y.shape[0])
+    x_train = x[:threshold]
+    x_test = x[threshold:]
+    y_train = y[:threshold]
+    y_test = y[threshold:]
+    return x_train, y_train, x_test, y_test
