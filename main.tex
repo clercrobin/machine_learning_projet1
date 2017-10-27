@@ -1,0 +1,67 @@
+\documentclass[10pt,conference,compsocconf]{IEEEtran}
+
+\usepackage{hyperref}
+\usepackage{graphicx}	% For figure environment
+
+
+\begin{document}
+\title{Machine Learning Project 1}
+
+\author{
+  Robin Clerc, Pierre Vigier, Jacob Levi Abitbol\\
+  \textit{Master of Computer Science, EPFL, Switzerland}
+}
+
+\maketitle
+
+\begin{abstract}
+  The CERN produces petabytes of data per year of data each day on the base of the ATLAS project, leading the research on the Higgs boson's decay.
+  This project consists in applying core machine learning methods which are really powerful with huge amounts of data to classify events from this experiment.
+\end{abstract}
+
+\section{Introduction}
+
+In the LHC, proton bunches are accelerated on a circular trajectory in both directions. The collisions between the protons are detected by sensors of the ATLAS detector which also detect particles resulting from those collisions, resulting in the tens of real-valued variables which we are provided with.
+
+But those sensors detect either actual interesting events (called $S$ for signal) or uninteresting events (called $B$ for background). The aim of this project is to improve the classification of the signal / background events, given the real-valued variables resulting from the event.
+
+
+\section{Models and Methods}
+\label{sec:structure-paper}
+
+\subsection{Data Exploration}
+
+We are provided with a training set of 250 000 labelled (with $S$ or $B$ events with 30 features and with a test set of 568238 unlabelled events to evaluate the performance of our model.
+
+We can observe that missing values are replaced with the value $-999$, which is very different from the other values, mainly positive : we may have to replace them by a more suitable value.
+
+12 features take their values in a range describing several orders of magnitude in the positive values and with very sparse density in the high values.
+
+The $PRI\_jet\_num$ feature (a jet is a particle) is interesting because our correlation study highlights a very high correlations between features containing -999 values. Indeed -999 values are not actually features that sensors failed to catch, it is simply that they do not exist : if there is no jet, it has no speed, or if there is 1 jet we cannot compute any angle between jets. We can split those sets in 3 categories not having the same number of initial features. 
+
+\subsection{Data processing}
+
+As previously stated, we split the sets in 3 categories : 
+\begin{itemize}
+    \item $Jet0$ for which we exclude the 12 constant features
+    \item $Jet1$ for which we exclude the 8 constant features
+    \item $Jet{2;3}$ 
+\end{itemize}
+
+We log-transform the features taking their values in several orders of magnitude.
+
+The we standardize each category by :
+\begin{itemize}
+    \item Getting the mean and the standard deviation of the training set category.
+    \item Normalize the training set category
+    \item Normalize the test set category with the mean and standard deviation of the training set.
+\end{itemize}
+
+\subsection{Feature engineering}
+
+As we are provided with angles, it can be interesting to add as a feature the absolute differences between those angles to extract more information.
+
+Then, depending on the method we build the polynomial features from each initial feature plus cross terms.
+
+
+\end{document}
