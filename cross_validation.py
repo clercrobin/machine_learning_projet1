@@ -9,16 +9,14 @@ def split_data(x, y, ratio, seed=1):
     and the rest dedicated to testing
     """
     # set seed
-<<<<<<< HEAD
+
     np.random.seed()
-=======
-    np.random.seed(seed)
->>>>>>> 983a996929ca9d0f8765b848e7597e93e7115823
+
     p = np.random.permutation(len(x))
     x = x[p]
     y = y[p]
     n_train = int(ratio * len(x))
-<<<<<<< HEAD
+
     return x[:n_train], y[:n_train], x[n_train:], y[n_train:]
 
 def accuracy(y, y_pred):
@@ -61,7 +59,5 @@ def cross_validation(y, x, k_indices, k, lambda_, gamma):
     # INSERT YOUR CODE HERE
     # calculate the loss for train and test data: TODO
     # ***************************************************
-    return accur    return accur
-=======
-    return x[:n_train], y[:n_train], x[n_train:], y[n_train:]
->>>>>>> 983a996929ca9d0f8765b848e7597e93e7115823
+    return accur
+
