@@ -49,8 +49,8 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
         w -= gamma * grad
         loss = compute_mse(y, tx, w)
         # log info
-        print("Stochastic Gradient Descent({bi}/{ti}): loss={l}".format(
-              bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
+        #print("Stochastic Gradient Descent({bi}/{ti}): loss={l}".format(
+         #     bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
     return w, loss
 
 def least_squares(y, tx):
@@ -96,7 +96,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         loss = compute_loss_lr(y, tx, w)
         w -= gamma * grad
         # log
-        print("Current iteration={i}, loss={l}".format(i=iter, l=loss/len(y)))
+        #print("Current iteration={i}, loss={l}".format(i=iter, l=loss/len(y)))
     return w, loss
 
 def compute_loss_reg_lr(y, tx, w, lambda_):
@@ -132,6 +132,6 @@ def reg_logistic_regression_SGD(y, tx, lambda_, initial_w, max_iters, gamma):
             w -= gamma * grad
             loss = compute_loss_reg_lr(minibatch_y, minibatch_tx, w, lambda_)
             # log
-            print("Current iteration={}/{}, loss={}".format(n_iter+1, max_iters, loss/batch_size))
+            #print("Current iteration={}/{}, loss={}".format(n_iter+1, max_iters, loss/batch_size))
             n_iter += 1
     return w, loss
