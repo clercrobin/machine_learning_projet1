@@ -87,12 +87,10 @@ This in turn enabled us to further remove static features from the dataset, yiel
 \end{table}
 
 Finally, the difference of the particle azimuthal angles $\Phi$, namely, \verb+PRI_tau_phi+, \verb+PRI_lep_phi+, \verb+PRI_met_phi+, were considered to be of potential interest  in determining the nature of the collision detected and were therefore added as features. \\
-Also, we found interesting to introduce non-linearities in our dataset by adding to our original data the  polynomial values of the features with degree less than or equal to $n$. This was then expanded to include the polynomial combinations of the features. 
-
-Thus when the degree $n$ of the base features improves we still keep a descent proportion of cross terms.
+Also, we found interesting to introduce non-linearities in our dataset by adding to our original data the  polynomial values of the features with degree less than or equal to $n$. This was then expanded to include the polynomial combinations of the features. Thus when the degree $n$ of the base features improves we still keep a descent proportion of cross terms.
 
 \section{Results and Discussion}
-As shown, in Table \ref{tab_first_run}, the use of the  more sophisticated Newton based  gradient descent methods was hindered by the the non-invertible nature of the Hessian matrix. Instead of implementing quasi-Newton methods to work around this condition, we chose to focus on the three first models. Also, the gradient descent using the SGD variant with a batch size of 256 training samples due to the high number of samples and features that were studied jointly. 
+As shown, in Table \ref{tab_first_run}, the use of the  more sophisticated Newton based  gradient descent methods was hindered by the the non-invertible nature of the Hessian matrix. Instead of implementing quasi-Newton methods to work around this condition, we chose to focus on the three first models. Also, the gradient descent using the SGD variant with a batch size of 256 training samples due to the high number of samples and features that were studied jointly. The models parameters were arbitrarily set at first at  $\lambda_=10^{-3}$,$\gamma=2.10^{-5}$, \verb+max_iter+=5000. 
  
 \begin{table}[h!]
 \centering
@@ -105,15 +103,15 @@ As shown, in Table \ref{tab_first_run}, the use of the  more sophisticated Newto
  \hline
    \verb+linear_regr+  & 82.56 &74.18  & 77.68  \\
    \verb+ridge_regr+  & 82.50 & 74.17  & 77.67 \\
-   \verb+log_regr_gd+  & 83.03  &  76.82 & 81.27 \\
-   \verb+penal_log_regr_gd+  & * & * &  * \\ 
+   \verb+log_regr_gd+ & 81.23 & 72.54  & 79.35\\
+   \verb+penal_log_regr_gd+  &  83.03  &  76.82 & 81.27 \\ 
    \verb+log_regr_newton+  & / & / & / \\
    \verb+penal_log_regr_newton+ &  / & / & / \\
   \hline
 \end{tabular}
 \label{tab_first_run}
 \end{table}
-We observed that the baseline application of the learning algorithms already provided good performances with accuracy scores ranging from 74\% to 83\%, the lowest accuracy corresponding to the \verb+Jet 1+ group. Given, the small gain (from 1 \% to 2\%) obtained from using logistic regression models with respect to using simpler linear models, we chose to focus on linear regression to train our classifier using either Least Squares or Ridge Regression.
+We observed that the baseline application of the learning algorithms already provided good performances with accuracy scores ranging from 74\% to 83\%, the lowest accuracy corresponding to the \verb+Jet 1+ group. Given the small gain (from 1 \% to 2\%) obtained from using logistic regression models with respect to using simpler linear models as well as the higher parametrization cost of the logistic models (in terms of definition and training), we chose to focus on linear regression to train our classifier using either Least Squares or Ridge Regression.
 We proceeded to compare the performance of these two  different learning algorithms by using a grid search with either a 4- or 10- fold cross-validation on the model's parameters: 
 
 \subsection{Least squares}
@@ -124,7 +122,7 @@ This model, when trained using its closed-formed solutions (depending on whether
 \footnotesize
 \begin{tabular}{|l| c|c| } 
  \hline
-   Jet & Degree & 10-fold Accuracy (\%)  \\
+   Jet & Degree+ FIO & 10-fold Accuracy (\%)  \\
  \hline
    \verb+Jet 0+  & 10 &  84.31 \\
    \verb+Jet 1+  & 9 & 79.56 \\
