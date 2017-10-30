@@ -86,11 +86,11 @@ This in turn enabled us to further remove static features from the dataset, yiel
 \end{table}
 
 Finally, the difference of the particle azimuthal angles $\Phi$, namely, \verb+PRI_tau_phi+, \verb+PRI_lep_phi+, \verb+PRI_met_phi+, were considered to be of potential interest  in determining the nature of the collision detected and were therefore added as features. \\
-Also, we found interesting to introduce non-linearities in our dataset by adding to our original data the  polynomial values of the features with degree less than or equal to $n$. This was then expanded to include the polynomial combinations of the features up to degree $M=\sqrt{n}$. Thus when the degree $n$ of the base features improves we still keep a descent proportion of cross terms.\vspace{-0.25cm}
+Also, we found interesting to introduce non-linearities in our dataset by adding to our original data the  polynomial values of the features with degree less than or equal to $n$. This was then expanded to include the polynomial combinations of the features up to degree $M=\sqrt{n}$. This allows to keep a decent proportion of cross as the degree $n$ of the base features increases.\vspace{-0.25cm}
 
 
 \section{Results and Discussion}
-As shown, in Table \ref{tab_first_run}, the use of the  more sophisticated Newton based  gradient descent methods was hindered by the the non-invertible nature of the Hessian matrix. Instead of implementing quasi-Newton methods to work around this condition, we chose to focus on the three first models. Also, the gradient descent using the SGD variant with a batch size of 256 training samples due to the high number of samples and features that were studied jointly. The models parameters were arbitrarily set at first at  $\lambda_=10^{-3}$,$\gamma=2.10^{-5}$, \verb+max_iter+=5000. 
+As shown, in Table \ref{tab_first_run}, the use of the more sophisticated Newton based  gradient descent methods was hindered by the the non-invertible nature of the Hessian matrix. Instead of implementing quasi-Newton methods to work around this condition, we chose to focus on the three first models. Also, the gradient descent using the SGD variant with a batch size of 256 training samples due to the high number of samples and features that were studied jointly. The models parameters were arbitrarily set at first at  $\lambda_=10^{-3}$,$\gamma=2.10^{-5}$, \verb+max_iter+=5000. 
 \begin{table}[h!]
 \centering
 \caption{Initial training results (Model predictive accuracy \%)}
