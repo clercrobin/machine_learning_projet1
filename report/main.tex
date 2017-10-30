@@ -57,7 +57,7 @@ The \verb+PRI_jet_num+ feature (a jet is a particle) is interesting because our 
 \label{fig_corr}
 \end{figure}
 
-An additional exploratory analysis via the pairwise correlation matrix (cf \ref{fig_corr}) reveals a clear cutoff between primitive and derivative features (starting around index 14) where  primitive features are highly correlated among themselves.¡
+An additional exploratory analysis via the pairwise correlation matrix (cf Figure \ref{fig_corr}) reveals a clear cutoff between primitive and derivative features (starting around index 14) where  primitive features are highly correlated among themselves.¡
 
 We also took notice that the \verb+PRI_jet_num+ feature, representing the number of particles or jets generated from the collision takes only 4 integer values (ranging from 0 to 3). This allowed to reduce the dimensionality of the original feature space by splitting our learning problem into 3 separate ones, each for a specific value of the number of jets (0,1,2-3).\\
 This in turn enabled us to further remove static features from the dataset, yielding 19 features for  \verb+Jet 0+, 23 for \verb+Jet 1+ and 30 for \verb+Jet 2-3+ (see Table \ref{tab_feats})
@@ -96,11 +96,7 @@ Thus when the degree $n$ of the base features improves we still keep a descent p
 We proceeded to compare the performance of different learning algorithms by using a grid search with either a 4- or 10- fold cross-validation on the model's parameters. Our choice of model was essentially motivated by considering the number of meta parameters defining each method in order to keep an order of magnitude on the performances: 
 
 \subsubsection{Least squares}
-
-In this method we just have to chose the degree of the polynomial features. This method was very efficient without cross terms but when we added the cross terms (and solve the problem of the singular matrix thanks to a gradient descent or the pseudoinverse) we got worse performances that we interpreted as over-fitting ; it was time to switch to a more complex model to counter it thanks to a penalization.
-
-Our grid search gave us the following results : 
-
+This model, when trained using its closed-formed solution, is parameter-free. We need only to choose the degree  up to which the polynomial features will be calculated. The optimal degree was obtained by grid-searching different values of $n$ ranging from 1 to 16 for each \verb+Jet+: 
 \begin{table}[h!]
 \centering
 \caption{Results of the grid search with cross terms \%)}
@@ -118,12 +114,10 @@ Our grid search gave us the following results :
 \end{tabular}
 \end{table}
 
-
 \subsubsection{Ridge regression}
+The optimal parametrization of this model required us to grid-search over the degree of the polynomial to be applied as well as the $\lambda$ regularization term to penalize high values for the weights. The $\lambda$ parameter was sampled from ... and the degree $n$ was considered as in the previous case: 
 
-Once again, we performed a grid search to know what were the best degree and the best $\lambda$ to use.
-
-As expected, it was not the same for the 3 sub categories. We got :
+%As expected, it was not the same for the 3 sub categories. We got :
 \begin{table}[h!]
 \centering
 \caption{Results of the grid search with cross terms \%)}
@@ -141,6 +135,7 @@ As expected, it was not the same for the 3 sub categories. We got :
 \end{tabular}
 \end{table}
 
+We find consistently greater performances across all different \verb+Jet+ values when adding the Tikhonov regularization term. It is worth noticing that, even with a small regularization term, this model allows for the adding of higher order polynomial features than least square without it leading necessarily to overfitting the training set. 
 
 As shown, in Table \ref{tab_first_run}, the use of the  more sophisticated Newton based  gradient descent methods was hindered by the the non-invertible nature of the Hessian matrix. Instead of implementing quasi-Newton methods to work around this condition, we chose to focus on the three first models. Also, the gradient descent using the SGD variant with a batch size of 33\% of the training samples due to the high number of samples and features that were studied jointly. 
  
@@ -151,7 +146,7 @@ As shown, in Table \ref{tab_first_run}, the use of the  more sophisticated Newto
 \hspace{-0.2cm}
 \begin{tabular}{ l| ccc } 
  \hline
-   Model & Jet 0 & Jet 1 & Jet 2-3  \\
+   Model & \verb+Jet 0+& \verb+Jet 1+& \verb+Jet 2-3+ \\
  \hline
    \verb+linear_regr+  & 82.56 &74.18  & 77.68  \\
    \verb+ridge_regr+  & 82.50 & 74.17  & 77.67 \\
