@@ -1,7 +1,7 @@
 \documentclass[10pt,conference,compsocconf]{IEEEtran}
 
 \usepackage{hyperref}
-\usepackage{graphicx}	% For figure environment
+\usepackage{graphicx} % For figure environment
 \usepackage{color}
 \usepackage{natbib}
 \usepackage{float}
@@ -100,6 +100,24 @@ We made the choice to use the different methods following their number of meta p
 
 In this method we just have to chose the degree of the polynomial features. This method was very efficient without cross terms but when we added the cross terms (and solve the problem of the singular matrix thanks to a gradient descent or the pseudoinverse) we got worse performances that we interpreted as over-fitting ; it was time to switch to a more complex model to counter it thanks to a penalization.
 
+Our grid search gave us the following results : 
+
+\begin{table}[h!]
+\centering
+\caption{Results of the grid search with cross terms \%)}
+\footnotesize
+\hspace{-0.2cm}
+\begin{tabular}{ l| ccc } 
+ \hline
+   Jet & Degree & 10-fold Accuracy  \\
+ \hline
+   \verb+Jet 0+  & 10 &  0.843138824942 \\
+   \verb+Jet 1+  & 9 & 0.795550683518 \\
+   \verb+Jet 2-3+  & 9 & 0.819699476151 \\
+  \hline
+\label{grid_search_ridge_cross}
+\end{tabular}
+\end{table}
 
 \textcolor{red}{A enlever : Our first submissions were made thanks to this algorithm, but when we added cross terms we had to use the gradient descent version as the matrix became singular Il y a une facon de resoudre ca en passant par la decomposition en SVD et la pseudoinverse. After a grid search to find the best degree, we decided to add a new parameter and thus perform a Ridge regression to avoid over-fitting. }
 
