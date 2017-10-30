@@ -2,46 +2,123 @@
 
 \usepackage{hyperref}
 \usepackage{graphicx}	% For figure environment
-
+\usepackage{color}
+\usepackage{natbib}
+\usepackage{float}
+\usepackage{cprotect}
+\usepackage{tabularx}
+\usepackage{multirow}
 
 \begin{document}
-\title{Machine Learning Project 1}
+\title{Higgs Boson Challenge: Machine Learning Project}
 
 \author{
-  Robin Clerc, Pierre Vigier, Jacob Levi Abitbol\\
+  Robin Clerc, Pierre Vigier, Jacob Levy Abitbol\\
   \textit{Master of Computer Science, EPFL, Switzerland}
 }
 
 \maketitle
 
 \begin{abstract}
-  The CERN produces petabytes of data per year of data each day on the base of the ATLAS project, leading the research on the Higgs boson's decay.
-  This project consists in applying core machine learning methods which are really powerful with huge amounts of data to classify events from this experiment.
-\end{abstract}
+  The CERN produces petabytes of data each day on the base of the ATLAS project, leading the research on the Higgs boson's decay.The often complex and high dimensional data sets generated in experiments are often hard to analyze and interpret. We give here an overview on how different learning methods perform on a collision event dataset.
+  \end{abstract}
 
 \section{Introduction}
 
-In the LHC, proton bunches are accelerated on a circular trajectory in both directions. The collisions between the protons are detected by sensors of the ATLAS detector which also detect particles resulting from those collisions, resulting in the tens of real-valued variables which we are provided with.
-
-But those sensors detect either actual interesting events (called $S$ for signal) or uninteresting events (called $B$ for background). The aim of this project is to improve the classification of the signal / background events, given the real-valued variables resulting from the event.
-
+The Higgs Boson is an elementary particle which explains why other particles have mass. It was discovered in collision experiments in the LHC, where proton bunches are accelerated on a circular trajectory in both directions. The collisions between the protons are detected by sensors of the ATLAS detector which also detect particles resulting from those collisions, resulting in the real-valued variables which we are provided with. These sensors however detect either actual interesting events or uninteresting events. The end goal of this project is then to improve the classification of the signal / background events, given the real-valued features resulting from the collision event.
 
 \section{Models and Methods}
 \label{sec:structure-paper}
 
-\subsection{Data Exploration}
+\subsection{Data Exploration and Preprocessing}
+The provided training dataset consists of a 250K samples corpus of collision events, where each event is classified as either signal $S$ or background $B$. Each collision is characterized by a set of 30 features from which the predictions will be made. A separate test set of unlabelled samples on which to test the performance of our models is also provided. \\
+A first glance at our dataset reveals that overall,
+more than 70\% of the events lack at least one feature, which is indicated in the data  by the value $-999$. These have to be imputed in order to be able to feed our dataset to a learning method. To handle this missing information we replaced the missing values of a given feature by its mean value, calculated separately for the training and the test set. \\
+We also noticed that 15 \textcolor{red}{(Ce que moi j'ai mis. Apparemment vous en avez 12. A discuter) } out of the 30 available features included in the dataset seem to be power-law distributed. In order to compensate for the high skew of the observed distributions, we took the logarithm of these selected features instead of the actual features themselves (see Figure \ref{fig_kde}).\\ Each feature was then normalized using the means and standard deviations computed over the training set. 
 
-We are provided with a training set of 250 000 labelled (with $S$ or $B$ events with 30 features and with a test set of 568238 unlabelled events to evaluate the performance of our model.
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\linewidth]{kdeplot.png}
 
-We can observe that missing values are replaced with the value $-999$, which is very different from the other values, mainly positive : we may have to replace them by a more suitable value.
+\cprotect\caption{KDE plot for the modulus of the vector sum of the transverse momentum of the hadronic tau \verb+DER_pt_h+.
+\emph{Left}: Original distribution. \emph{Right}:  Distribution of log values}
+\label{fig_kde}
+\end{figure}
 
-12 features take their values in a range describing several orders of magnitude in the positive values and with very sparse density in the high values.
+%12 features take their values in a range describing several orders of magnitude in the positive values and with very sparse density in the high values.
 
-The $PRI\_jet\_num$ feature (a jet is a particle) is interesting because our correlation study highlights a very high correlations between features containing -999 values. Indeed -999 values are not actually features that sensors failed to catch, it is simply that they do not exist : if there is no jet, it has no speed, or if there is 1 jet we cannot compute any angle between jets. We can split those sets in 3 categories not having the same number of initial features. 
+The \verb+PRI_jet_num+ feature (a jet is a particle) is interesting because our correlation study highlights a very high correlations between features containing -999 values. Indeed -999 values are not actually features that sensors failed to catch, it is simply that they do not exist : if there is no jet, it has no speed, or if there is 1 jet we cannot compute any angle between jets. We can split those sets in 3 categories not having the same number of initial features.\\
 
-\subsection{Data processing}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{corr.png}
 
-As previously stated, we split the sets in 3 categories : 
+\cprotect\caption{Pairwise correlations of base features. Labels indicate the feature's index in the provided dataset. }
+\label{fig_corr}
+\end{figure}
+
+We also took notice that the \verb+PRI_jet_num+ feature, representing the number of particles or jets generated from the collision takes only 4 integer values (ranging from 0 to 3). This allowed to reduce the dimensionality of the original feature space by splitting our learning problem into 3 separate ones, each for a specific value of the number of jets (0,1,2-3).\\
+This in turn enabled us to further remove static features from the dataset, as follows:
+\begin{table}[h!]
+\centering
+\caption{Missing values per feature and per jet value shown for features containing NaN (*: all, /: None)}
+\footnotesize
+\label{tab:3}
+\hspace{-0.2cm}
+\begin{tabular}{ l| ccc } 
+ \hline
+   NaN Features & Jet 0 & Jet 1 & Jet 2-3 \\
+ \hline
+   \verb+DER_deltaeta_jet_jet+  & * & * & /  \\
+   \verb+DER_lep_eta_centrality+  & * & / & / \\
+   \verb+DER_mass_jet_jet+  & * & * & / \\
+   \verb+DER_prodeta_jet_jet+  & * & * & /  \\ 
+   \verb+PRI_jet_all_pt+  & * & * & /  \\
+   \verb+PRI_jet_leading_eta+  & * & * & / \\
+   \verb+PRI_jet_leading_phi+  & * & / & /   \\
+   \verb+PRI_jet_leading_pt+  & * & / & / \\
+   \verb+PRI_jet_subleading_eta+  & * & / & / \\
+   \verb+PRI_jet_subleading_phi+  & * & * & /  \\
+   \verb+PRI_jet_subleading_pt+  & * & * & /  \\
+  \hline
+\end{tabular}
+\end{table}
+In the end, we have
+\begin{itemize}
+    \item \verb+Jet 0+ : 19 features
+    \item \verb+Jet 1+ : 23 features
+    \item \verb+Jet 2-3+ : 30 features
+\end{itemize}
+
+\subsection{Feature engineering}
+
+\textcolor{red}{Fait?? Oui on a fait ça, ça rajoute 3 features\\}First of all, as we are provided with angles, it can be interesting to add as a feature the absolute differences between those angles to extract more information.
+
+Then, depending on the method we build the polynomial features from each initial feature and their cross terms.
+
+\subsection{Different algorithms}
+
+For each of the following algorithms we performed either a 4 and a 10 fold cross validation before submitting to check the robustness of our models
+
+\subsubsection{Least squares}
+
+Our first submissions were made thanks to this algorithm, but when we added cross terms we had to use the gradient descent version as the matrix became singular. After a grid search to find the best degree, we decided to add a new parameter and thus perform a Ridge regression to avoid over-fitting.
+
+\subsubsection{Ridge regression}
+
+The algorithm we used the most. we performed a grid search to know what were the best degree and the best $\lambda$ to use.
+
+As expected, it was not the same for the 3 sub categories. We got :
+\begin{itemize}
+\item
+\end{itemize}
+
+
+
+\end{document}
+\subsection{Data preprocessing}
+
+As previously stated, we split the sets in 3 categories:  
 \begin{itemize}
     \item $Jet0$ for which we exclude the 12 constant features
     \item $Jet1$ for which we exclude the 8 constant features
@@ -57,11 +134,3 @@ The we standardize each category by :
     \item Normalize the test set category with the mean and standard deviation of the training set.
 \end{itemize}
 
-\subsection{Feature engineering}
-
-As we are provided with angles, it can be interesting to add as a feature the absolute differences between those angles to extract more information.
-
-Then, depending on the method we build the polynomial features from each initial feature plus cross terms.
-
-
-\end{document}
