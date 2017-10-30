@@ -25,16 +25,20 @@
 
 \section{Introduction}
 
-The Higgs Boson is an elementary particle which explains why other particles have mass. It was discovered in collision experiments in the LHC, where proton bunches are accelerated on a circular trajectory in both directions. The collisions between the protons are detected by sensors of the ATLAS detector which also detect particles resulting from those collisions, resulting in the real-valued variables which we are provided with. These sensors however detect either actual interesting events or uninteresting events. The end goal of this project is then to improve the classification of the signal / background events, given the real-valued features resulting from the collision event.
+The Higgs Boson is an elementary particle which explains why other particles have mass. It was discovered in collision experiments in the LHC, where bunches of protons are accelerated on a circular trajectory in both directions. The collisions between protons are detected by sensors of the ATLAS detector. They also detect particles created by those collisions. Those measures corresponds to the real-valued variables which we are provided with. Those sensors however detect either actual interesting events or uninteresting events. The end goal of this project is then to improve the classification of the signal / background events given the real-valued features resulting from the collision event.
 
 \section{Models and Methods}
 \label{sec:structure-paper}
 
 \subsection{Data Exploration and Preprocessing}
-The provided training dataset consists of a 250K samples corpus of collision events, where each event is classified as either signal $S$ or background $B$. Each collision is characterized by a set of 30 features from which the predictions will be made. A separate test set of unlabelled samples on which to test the performance of our models is also provided. \\
-A first glance at our dataset reveals that overall,
-more than 70\% of the events lack at least one feature, which is indicated in the data  by the value $-999$. These have to be imputed in order to be able to feed our dataset to a learning method. To handle this missing information we replaced the missing values of a given feature by its mean value, calculated separately for the training and the test set. \\
-We also noticed that 15 \textcolor{red}{(Ce que moi j'ai mis. Apparemment vous en avez 12. A discuter) } out of the 30 available features included in the dataset seem to be power-law distributed. In order to compensate for the high skew of the observed distributions, we took the logarithm of these selected features instead of the actual features themselves (see Figure \ref{fig_kde}).\\ Each feature was then normalized using the means and standard deviations computed over the training set. 
+
+The provided training dataset consists of a 250K samples corpus of collision events where each event is classified as either signal $S$ or background $B$. Each collision is characterized by a set of 30 features from which the predictions will be made. A separate test set of unlabeled samples is also provided. It allows us to assess the performance of our models.
+
+At first glance, our dataset reveals that overall more than 70\% of the events lack at least one feature, which is indicated in the data by the value $-999$. These have to be imputed in order to be able to feed the dataset to a learning method. To handle this missing information we replaced the missing values of a given feature by its mean value, calculated separately for the training and the test set.
+
+We also noticed that 15 \textcolor{red}{(Ce que moi j'ai mis. Apparemment vous en avez 12. A discuter) } out of the 30 available features included in the dataset seem to be power-law distributed. In order to compensate for the high skew of the observed distributions, we took the logarithm of these selected features instead of the actual features themselves (see Figure \ref{fig_kde}).
+
+Each feature was then normalized using its mean and standard deviation computed over the training set. 
 
 \begin{figure}[htb]
 \centering
@@ -47,7 +51,7 @@ We also noticed that 15 \textcolor{red}{(Ce que moi j'ai mis. Apparemment vous e
 
 %12 features take their values in a range describing several orders of magnitude in the positive values and with very sparse density in the high values.
 
-The \verb+PRI_jet_num+ feature (a jet is a particle) is interesting because our correlation study highlights a very high correlations between features containing -999 values. Indeed -999 values are not actually features that sensors failed to catch, it is simply that they do not exist : if there is no jet, it has no speed, or if there is 1 jet we cannot compute any angle between jets. We can split those sets in 3 categories not having the same number of initial features.\\
+The \verb+PRI_jet_num+ feature (a jet is a particle) is interesting because our correlation study highlights a very high correlations between features containing -999 values. Indeed -999 values are not actually features that sensors failed to catch, it is simply that they do not exist: if there is no jet, it has no speed, or if there is only one jet we cannot compute any angle between jets. Thus, we can split those sets in three categories not having the same number of initial features.
 
 \begin{figure}[H]
 \centering
@@ -59,8 +63,10 @@ The \verb+PRI_jet_num+ feature (a jet is a particle) is interesting because our 
 
 We can see that the primitive features are highly correlated.
 
-We also took notice that the \verb+PRI_jet_num+ feature, representing the number of particles or jets generated from the collision takes only 4 integer values (ranging from 0 to 3). This allowed to reduce the dimensionality of the original feature space by splitting our learning problem into 3 separate ones, each for a specific value of the number of jets (0,1,2-3).\\
-This in turn enabled us to further remove static features from the dataset, yielding 19 features for  \verb+Jet 0+, 23 for \verb+Jet 1+ and 30 for \verb+Jet 2-3+ (see Table \ref{tab_feats})
+We also took notice that the \verb+PRI_jet_num+ feature representing the number of particles or jets generated from the collision takes only 4 integer values (ranging from 0 to 3). This allowed to reduce the dimensionality of the original feature space by splitting our learning problem into 3 separate ones: one for each specific value of the number of jets (0, 1, 2-3).
+
+This in turn enabled us to further remove static features from the dataset, yielding 19 features for  \verb+Jet 0+, 23 for \verb+Jet 1+ and 30 for \verb+Jet 2-3+ (see Table \ref{tab_feats}).
+
 \begin{table}[h!]
 \centering
 \caption{Missing values per feature and per jet value shown for features containing NaN (*: all, /: None)}
@@ -86,21 +92,21 @@ This in turn enabled us to further remove static features from the dataset, yiel
 \end{tabular}
 \end{table}
 
-Finally, the difference of the particle azimuthal angles $\Phi$, namely, \verb+PRI_tau_phi+, \verb+PRI_lep_phi+, \verb+PRI_met_phi+, were considered to be of potential interest  in determining the nature of the collision detected and were therefore added as features.
+Finally, the differences of the particle azimuthal angles $\Phi$, namely \verb+PRI_tau_phi+, \verb+PRI_lep_phi+, \verb+PRI_met_phi+, were considered to be of potential interest in determining the nature of the collision detected and were therefore added as features.
 
-Then, depending on the result of the grid search on the different methods and jets, we add a certain number $n$ of polynomial features from each initial feature. And then we build the cross terms of the base features, and add their $\sqrt{n}$ first polynomial features. Thus when the degree $n$ of the base features improves we still keep a descent proportion of cross terms.
+Then, depending on the result of the grid search on the different methods and number of jets, we add a certain number $n$ of polynomial features from each initial feature. And then we build the cross terms of the base features, and add their $\sqrt{n}$ first polynomial features. Thus when the degree $n$ of the base features increases we still keep a descent proportion of cross terms.
 
 \subsection{Different methods tested}
 
 For each of the following algorithms we performed either a 4 or a 10 fold cross validation for each element in the grid search to check the robustness of our models.
 
-We made the choice to use the different methods following their number of meta parameters to keep an order of magnitude of the performances.
+We made the choice to use the different methods following their number of meta parameters to keep an order of magnitude of the performances.  \textcolor{red}{Je comprends pas ce paragraphe !}
 
 \subsubsection{Least squares}
 
-In this method we just have to chose the degree of the polynomial features. This method was very efficient without cross terms but when we added the cross terms (and solve the problem of the singular matrix thanks to a gradient descent or the pseudoinverse) we got worse performances that we interpreted as over-fitting ; it was time to switch to a more complex model to counter it thanks to a penalization.
+In this method we just have to choose the degree of the polynomial features. This method was very efficient without cross terms but when we added the cross terms (and solve the problem of the singular matrix thanks to a gradient descent or the pseudoinverse) we got even worse performances that we interpreted as overfitting. Consequently, we decided to use methods that are able to manage overfitting thanks to penalization.
 
-Our grid search gave us the following results : 
+Our grid search gave us the following results: 
 
 \begin{table}[h!]
 \centering
@@ -144,7 +150,7 @@ As expected, it was not the same for the 3 sub categories. We got :
 \end{table}
 
 
-As shown, in Table \ref{tab_first_run}, the use of the  more sophisticated Newton based  gradient descent methods was hindered by the the non-invertible nature of the Hessian matrix. Instead of implementing quasi-Newton methods to work around this condition, we chose to focus on the three first models. Also, the gradient descent using the SGD variant with a batch size of 33\% of the training samples due to the high number of samples and features that were studied jointly. 
+As shown, in Table \ref{tab_first_run}, the use of the more sophisticated Newton based gradient descent methods was hindered by the non-invertible nature of the Hessian matrix. Instead of implementing quasi-Newton methods to work around this condition, we chose to focus on the three first models. Also, the gradient descent using the SGD variant with a batch size of 33\% of the training samples due to the high number of samples and features that were studied jointly. 
  
 \begin{table}[h!]
 \centering
