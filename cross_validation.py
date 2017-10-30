@@ -32,20 +32,12 @@ def accuracy(y, y_pred):
 
 def cross_validation(y, x, k_indices, k, lambda_, gamma):
     """return the loss of ridge regression."""
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # get k'th subgroup in test, others in train: TODO
-    # ***************************************************
     all_indices = np.arange(y.shape[0])
     excepted = np.setdiff1d(all_indices,k_indices[k])
     x_test = x[k_indices[k]]
     y_test = y[k_indices[k]]
     x_train = x[excepted]
     y_train = y[excepted]
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # ridge regression: TODO
-    # ***************************************************
     #w, loss = ridge_regression(y_train,x_train, lambda_)
     w, loss = least_squares(y_train,x_train)
     #w, loss = least_squares_SGD(y_train, x_train, np.zeros(x_train.shape[1]), 50, lambda_)
@@ -54,11 +46,5 @@ def cross_validation(y, x, k_indices, k, lambda_, gamma):
     #print("One new regression")
     #print(w_tr)
     y_pred = predict_labels(w, x_test)
-    
-    accur = accuracy(y_test, y_pred)
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # calculate the loss for train and test data: TODO
-    # ***************************************************
-    return accur
+    return accuracy(y_test, y_pred)
 
