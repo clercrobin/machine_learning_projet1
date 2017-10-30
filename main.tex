@@ -57,13 +57,14 @@ The \verb+PRI_jet_num+ feature (a jet is a particle) is interesting because our 
 \label{fig_corr}
 \end{figure}
 
+We can see that the primitive features are highly correlated.
+
 We also took notice that the \verb+PRI_jet_num+ feature, representing the number of particles or jets generated from the collision takes only 4 integer values (ranging from 0 to 3). This allowed to reduce the dimensionality of the original feature space by splitting our learning problem into 3 separate ones, each for a specific value of the number of jets (0,1,2-3).\\
-This in turn enabled us to further remove static features from the dataset, as follows:
+This in turn enabled us to further remove static features from the dataset, yielding 19 features for  \verb+Jet 0+, 23 for \verb+Jet 1+ and 30 for \verb+Jet 2-3+ (see Table \ref{tab_feats})
 \begin{table}[h!]
 \centering
 \caption{Missing values per feature and per jet value shown for features containing NaN (*: all, /: None)}
 \footnotesize
-\label{tab:3}
 \hspace{-0.2cm}
 \begin{tabular}{ l| ccc } 
  \hline
@@ -81,37 +82,72 @@ This in turn enabled us to further remove static features from the dataset, as f
    \verb+PRI_jet_subleading_phi+  & * & * & /  \\
    \verb+PRI_jet_subleading_pt+  & * & * & /  \\
   \hline
+\label{tab_feats}
 \end{tabular}
 \end{table}
-In the end, we have
-\begin{itemize}
-    \item \verb+Jet 0+ : 19 features
-    \item \verb+Jet 1+ : 23 features
-    \item \verb+Jet 2-3+ : 30 features
-\end{itemize}
 
-\subsection{Feature engineering}
+Finally, the difference of the particle azimuthal angles $\Phi$, namely, \verb+PRI_tau_phi+, \verb+PRI_lep_phi+, \verb+PRI_met_phi+, were considered to be of potential interest  in determining the nature of the collision detected and were therefore added as features.
 
-\textcolor{red}{Fait?? Oui on a fait ça, ça rajoute 3 features\\}First of all, as we are provided with angles, it can be interesting to add as a feature the absolute differences between those angles to extract more information.
+Then, depending on the result of the grid search on the different methods and jets, we add a certain number $n$ of polynomial features from each initial feature. And then we build the cross terms of the base features, and add their $\sqrt{n}$ first polynomial features. Thus when the degree $n$ of the base features improves we still keep a descent proportion of cross terms.
 
-Then, depending on the method we build the polynomial features from each initial feature and their cross terms.
+\subsection{Different methods tested}
 
-\subsection{Different algorithms}
+For each of the following algorithms we performed either a 4 or a 10 fold cross validation for each element in the grid search to check the robustness of our models.
 
-For each of the following algorithms we performed either a 4 and a 10 fold cross validation before submitting to check the robustness of our models
+We made the choice to use the different methods following their number of meta parameters to keep an order of magnitude of the performances.
 
 \subsubsection{Least squares}
 
-Our first submissions were made thanks to this algorithm, but when we added cross terms we had to use the gradient descent version as the matrix became singular. After a grid search to find the best degree, we decided to add a new parameter and thus perform a Ridge regression to avoid over-fitting.
+In this method we just have to chose the degree of the polynomial features. This method was very efficient without cross terms but when we added the cross terms (and solve the problem of the singular matrix thanks to a gradient descent or the pseudoinverse) we got worse performances that we interpreted as over-fitting ; it was time to switch to a more complex model to counter it thanks to a penalization.
+
+
+\textcolor{red}{A enlever : Our first submissions were made thanks to this algorithm, but when we added cross terms we had to use the gradient descent version as the matrix became singular Il y a une facon de resoudre ca en passant par la decomposition en SVD et la pseudoinverse. After a grid search to find the best degree, we decided to add a new parameter and thus perform a Ridge regression to avoid over-fitting. }
 
 \subsubsection{Ridge regression}
 
-The algorithm we used the most. we performed a grid search to know what were the best degree and the best $\lambda$ to use.
+Once again, we performed a grid search to know what were the best degree and the best $\lambda$ to use.
 
 As expected, it was not the same for the 3 sub categories. We got :
-\begin{itemize}
-\item
-\end{itemize}
+\begin{table}[h!]
+\centering
+\caption{Results of the grid search with cross terms \%)}
+\footnotesize
+\hspace{-0.2cm}
+\begin{tabular}{ l| ccc } 
+ \hline
+   Jet & Degree & Lambda & 10-fold Accuracy  \\
+ \hline
+   \verb+Jet 0+  & 11 & $10^{-15}$  & 0.845941347212  \\
+   \verb+Jet 1+  & 12 & $10^{-15}$  & 0.802476141346 \\
+   \verb+Jet 2-3+  & 14  &  $10^{-13}$ & 0.826619795975 \\
+  \hline
+\label{grid_search_ridge_cross}
+\end{tabular}
+\end{table}
+
+
+As shown, in Table \ref{tab_first_run}, the use of the  more sophisticated Newton based  gradient descent methods was hindered by the the non-invertible nature of the Hessian matrix. Instead of implementing quasi-Newton methods to work around this condition, we chose to focus on the three first models. Also, the gradient descent using the SGD variant with a batch size of 33\% of the training samples due to the high number of samples and features that were studied jointly. 
+ 
+\begin{table}[h!]
+\centering
+\caption{Initial training results (Model predictive accuracy \%)}
+\footnotesize
+\hspace{-0.2cm}
+\begin{tabular}{ l| ccc } 
+ \hline
+   Model & Jet 0 & Jet 1 & Jet 2-3  \\
+ \hline
+   \verb+linear_regr+  & 82.56 &74.18  & 77.68  \\
+   \verb+ridge_regr+  & 82.50 & 74.17  & 77.67 \\
+   \verb+log_regr_gd+  & 83.03  &  76.82 & 81.27 \\
+   \verb+penal_log_regr_gd+  & * & * &  * \\ 
+   \verb+log_regr_newton+  & / & / & / \\
+   \verb+penal_log_regr_newton+ &  / & / & / \\
+  \hline
+\label{tab_first_run}
+\end{tabular}
+\end{table}
+
 
 
 
@@ -133,4 +169,15 @@ The we standardize each category by :
     \item Normalize the training set category
     \item Normalize the test set category with the mean and standard deviation of the training set.
 \end{itemize}
+
+\subsection{Feature engineering}
+
+ First of all, as we are provided with angles, it can be interesting to add as a feature the absolute differences between those angles to extract more information.
+
+
+
+
+
+
+
 
