@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import transpose as t
 
 # Least squares regression
 
@@ -54,10 +55,17 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     return w, loss
 
 def least_squares(y, tx):
-    """ Least squares regression using direct approach. """
-    w = np.linalg.solve(np.dot(tx.T, tx), np.dot(tx.T, y))
-    loss = compute_mse(y, tx, w)
-    return w, loss
+    """calculate the least squares solution."""
+    n_samples,n_feats=tx.shape
+    M=np.dot(t(tx),tx)
+    if np.linalg.matrix_rank(tx)==n_feats:
+        w_opt=np.dot(np.dot(np.linalg.inv(M),t(tx)),y)
+    else:
+        U,S,V=np.linalg.svd(tx,full_matrices=False)
+        tild_S=np.linalg.pinv(np.diag(S))
+        w_opt=np.dot(np.dot(t(V),tild_S),np.dot(t(U),y))
+    loss = compute_mse(y, tx, w_opt)
+    return w_opt, loss
 
 # Ridge regression
 
@@ -135,3 +143,62 @@ def reg_logistic_regression_SGD(y, tx, lambda_, initial_w, max_iters, gamma):
             #print("Current iteration={}/{}, loss={}".format(n_iter+1, max_iters, loss/batch_size))
             n_iter += 1
     return w, loss
+
+
+def calculate_loss_log_reg(y, tx, w):
+    """compute the cost by negative log likelihood."""
+    y=y.reshape((tx.shape[0],1))
+    w=w.reshape((tx.shape[1],1))
+    inter=(tx.dot(w))
+    pre_loss=np.log(1+np.exp(inter))-y*inter
+    return np.sum(pre_loss)
+
+def calculate_gradient_log_reg(y, tx, w):
+    """compute the gradient of loss."""
+    w=np.array(w,dtype='f')
+    y=y.reshape((tx.shape[0],1))
+    w=w.reshape((tx.shape[1],1))
+    return t(tx).dot(sigmoid(tx.dot(w))-y)
+
+def calculate_hessian_log_reg(y, tx, w):
+    """return the hessian of the loss function."""
+    S=np.diag((sigmoid(tx.dot(w))*(1-sigmoid(tx.dot(w)))).flatten())
+    return (t(tx).dot(S)).dot(tx)
+
+def logistic_regression(y, tx, w):
+    """return the loss, gradient, and hessian."""
+    return calculate_loss_log_reg(y, tx, w),calculate_gradient_log_reg(y, tx, w),calculate_hessian_log_reg(y, tx, w)
+
+def learn_by_grad_desc_log_reg(y, tx, w, gamma):
+    """
+    Do one step of gradient descen using logistic regression.
+    Return the loss and the updated w.
+    """
+    loss=calculate_loss_log_reg(y, tx, w)
+    grad=calculate_gradient_log_reg(y,tx,w)
+    w-=gamma*grad
+    return loss, w
+
+def learn_by_newton_log_reg(y, tx, w):
+    """Do one step on Newton's method. Returns the loss as weel as updated w. """
+    loss,grad,hess=logistic_regression(y, tx, w)
+    inter=np.linalg.inv(hess).dot(grad)
+    w-=inter
+    return loss, w
+
+def penalized_logistic_regression(y, tx, w, lambda_):
+    """return the loss, gradient, and hessian."""
+    loss=calculate_loss_log_reg(y, tx, w)+lambda_*t(w).dot(w)
+    grad=calculate_gradient_log_reg(y, tx, w)+2*lambda_*w
+    hess=calculate_hessian_log_reg(y, tx, w)+2*lambda_
+    return loss,grad,hess
+
+def learn_by_pen_grad_log_reg(y, tx, w, lambda_):
+    """
+    Do one step of gradient descent, using the penalized logistic regression.
+    Return the loss and updated w.
+    """
+    loss,grad,hess=penalized_logistic_regression(y, tx, w,lambda_)
+    inter=np.linalg.inv(hess).dot(grad)
+    w-=inter
+    return loss, w

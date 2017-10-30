@@ -1,5 +1,5 @@
 import numpy as np
-from implementations import ridge_regression, compute_mse, least_squares_SGD,reg_logistic_regression_SGD, logistic_regression
+from implementations import ridge_regression, compute_mse, least_squares_SGD,reg_logistic_regression_SGD, logistic_regression, least_squares
 from proj1_helpers import *
 
 def split_data(x, y, ratio, seed=1):
@@ -47,9 +47,10 @@ def cross_validation(y, x, k_indices, k, lambda_, gamma):
     # ridge regression: TODO
     # ***************************************************
     #w, loss = ridge_regression(y_train,x_train, lambda_)
+    w, loss = least_squares(y_train,x_train)
     #w, loss = least_squares_SGD(y_train, x_train, np.zeros(x_train.shape[1]), 50, lambda_)
     #w, loss = logistic_regression(y_train, x_train, np.zeros(x_train.shape[1]), 50, lambda_)
-    w, loss = reg_logistic_regression_SGD((y_train == 1).astype(float), x_train, lambda_, np.zeros(x_train.shape[1]), 2000, gamma)
+    #w, loss = reg_logistic_regression_SGD((y_train == 1).astype(float), x_train, lambda_, np.zeros(x_train.shape[1]), 2000, gamma)
     #print("One new regression")
     #print(w_tr)
     y_pred = predict_labels(w, x_test)

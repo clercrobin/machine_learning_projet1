@@ -18,8 +18,8 @@ def build_poly(x, degree):
     indices_j = np.array(np.sum([[j for j in range(i)] for i in range(x.shape[1])]))
     cross_terms = x[:,indices_i] * x[:,indices_j]
     processed = np.hstack((poly_basis, cross_terms))
-    for k in range(int(np.sqrt(degree/2))):
-        processed = np.hstack((processed, np.power(x, k)))
+    for k in range(2,int(np.sqrt(degree/2))):
+        processed = np.hstack((processed, np.power(cross_terms, k)))
     
     # Add a bias term
     processed = np.c_[np.ones(len(x)), processed]
