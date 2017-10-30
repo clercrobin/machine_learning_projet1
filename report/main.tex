@@ -38,7 +38,7 @@ We also noticed that 12 out of the 30 available features included in the dataset
 
 \begin{figure}[htb]
 \centering
-\includegraphics[width=\linewidth]{kdeplot.png}
+\includegraphics[width=0.8\linewidth]{kdeplot.png}
 
 \cprotect\caption{KDE plot for the modulus of the vector sum of the transverse momentum of the hadronic tau \verb+DER_pt_h+.
 \emph{Left}: Original distribution. \emph{Right}:  Distribution of log values}
@@ -47,12 +47,11 @@ We also noticed that 12 out of the 30 available features included in the dataset
 
 %12 features take their values in a range describing several orders of magnitude in the positive values and with very sparse density in the high values.
 
-The \verb+PRI_jet_num+ feature (a jet is a particle) is interesting because our correlation study highlights a very high correlations between features containing -999 values. Indeed -999 values are not actually features that sensors failed to catch, it is simply that they do not exist : if there is no jet, it has no speed, or if there is 1 jet we cannot compute any angle between jets. We can split those sets in 3 categories not having the same number of initial features.\\
-
+The \verb+PRI_jet_num+ feature (a jet is a particle) is interesting because our correlation study highlights a very high correlations between features containing -999 values. Indeed -999 values are not actually features that sensors failed to catch, it is simply that they do not exist : if there is no jet, it has no speed, or if there is 1 jet we cannot compute any angle between jets. We can split those sets in 3 categories not having the same number of initial features.
+\vspace{-0.1cm}
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.6\linewidth]{corr.png}
-
 \cprotect\caption{Pairwise correlations of base features. Labels indicate the feature's index in the provided dataset. }
 \label{fig_corr}
 \end{figure}
@@ -87,16 +86,16 @@ This in turn enabled us to further remove static features from the dataset, yiel
 \end{table}
 
 Finally, the difference of the particle azimuthal angles $\Phi$, namely, \verb+PRI_tau_phi+, \verb+PRI_lep_phi+, \verb+PRI_met_phi+, were considered to be of potential interest  in determining the nature of the collision detected and were therefore added as features. \\
-Also, we found interesting to introduce non-linearities in our dataset by adding to our original data the  polynomial values of the features with degree less than or equal to $n$. This was then expanded to include the polynomial combinations of the features. Thus when the degree $n$ of the base features improves we still keep a descent proportion of cross terms.
+Also, we found interesting to introduce non-linearities in our dataset by adding to our original data the  polynomial values of the features with degree less than or equal to $n$. This was then expanded to include the polynomial combinations of the features up to degree $M=\sqrt{n}$. Thus when the degree $n$ of the base features improves we still keep a descent proportion of cross terms.\vspace{-0.25cm}
+
 
 \section{Results and Discussion}
 As shown, in Table \ref{tab_first_run}, the use of the  more sophisticated Newton based  gradient descent methods was hindered by the the non-invertible nature of the Hessian matrix. Instead of implementing quasi-Newton methods to work around this condition, we chose to focus on the three first models. Also, the gradient descent using the SGD variant with a batch size of 256 training samples due to the high number of samples and features that were studied jointly. The models parameters were arbitrarily set at first at  $\lambda_=10^{-3}$,$\gamma=2.10^{-5}$, \verb+max_iter+=5000. 
- 
 \begin{table}[h!]
 \centering
 \caption{Initial training results (Model predictive accuracy \%)}
 \footnotesize
-\hspace{-0.2cm}
+\hspace{-0.3cm}
 \begin{tabular}{ l| ccc } 
  \hline
    Model & \verb+Jet 0+& \verb+Jet 1+& \verb+Jet 2-3+ \\
@@ -116,28 +115,32 @@ We proceeded to compare the performance of these two  different learning algorit
 
 \subsection{Least squares}
 This model, when trained using its closed-formed solutions (depending on whether or not the Gram matrix is invertible), is parameter-free. We needed only to choose the degree  up to which the polynomial features will be calculated. The optimal degree was obtained by grid-searching different values of $n$ ranging from 1 to 16 for each \verb+Jet+: 
+\vspace{-0.2cm}
 \begin{table}[h!]
 \centering
-\caption{Least Square grid search with cross terms }
+\caption{LS gridsearch with (MOI) and without $M^{th}$-order interactions  }
 \footnotesize
 \begin{tabular}{|l| c|c| } 
  \hline
-   Jet & Degree+ FIO & 10-fold Accuracy (\%)  \\
+   Jet & Degree & 10-fold Accuracy (\%)  \\
  \hline
-   \verb+Jet 0+  & 10 &  84.31 \\
-   \verb+Jet 1+  & 9 & 79.56 \\
-   \verb+Jet 2-3+  & 9 & 81.97\\
+    \verb+Jet 0+  & 8 &  84.18 \\
+    \verb+Jet 0 (MOI)+   & 10 &  84.31 \\
+    \verb+Jet 1+  & 4 & 79.13 \\
+    \verb+Jet 1 (MOI)+  & 9 & 79.56 \\
+    \verb+Jet 2-3+  & 9 & 81.25\\
+    \verb+Jet 2-3 (MOI)+ & 9 & 81.97\\
   \hline
 \end{tabular}
 \label{grid_search_ridge_cross}
 \end{table}
-As can be observed in the above table, we clearly see that the adding of the polynomial features and the first-order interaction terms proved beneficial in terms of our model's predictive power, as the accuracy was raised consistently across different jets from $2\%$ in \verb+Jet 0+  to $5\%$ in \verb+Jet 1+. Using high order terms lead to overfitting the training set which drove us to try penalizing high weights via Ridge regression.
+As can be observed in the above table, we clearly see that the adding of the polynomial features and the $M^{th}$-order interaction terms proved beneficial in terms of our model's predictive power, as the accuracy was raised consistently across different jets from $2\%$ in \verb+Jet 0+  to $5\%$ in \verb+Jet 1+. In spite of the small accuracy increase achieved by the addition of the \verb+MOI+, these were kept in what follows. Using high order terms led to overfitting during training which drove us to try penalizing high weights via Ridge regression. 
 \subsection{Ridge regression}
 The optimal parametrization of this model required us to grid-search over the degree of the polynomial to be applied as well as the $\lambda$ regularization term to penalize high values for the weights. The $\lambda$ parameter was sampled uniformly from $[10^{-20},10^{-3}]$ and the degree $n$ was considered as in the previous case: 
-%As expected, it was not the same for the 3 sub categories. We got :
+\vspace{-0.5cm}
 \begin{table}[h!]
 \centering
-\caption{Ridge regression Square grid search  with cross terms}
+\caption{Ridge regression grid search  with  $M^{th}$-order interactions}
 \footnotesize
 \begin{tabular}{|l| cc|c| } 
  \hline
