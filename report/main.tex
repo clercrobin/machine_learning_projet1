@@ -25,13 +25,12 @@
 
 \section{Introduction}
 
-The Higgs Boson is an elementary particle which explains why other particles have mass. It was discovered in collision experiments in the LHC, where  bunches of protons are accelerated on a circular trajectory in both directions. The collisions between the protons are detected by sensors of the ATLAS detector which also detect particles resulting from those collisions, resulting in the real-valued variables which we are provided with. These sensors however detect either actual interesting events or uninteresting events. The end goal of this project is then to improve the classification of the signal / background events, given the real-valued features resulting from the collision event.
+The Higgs Boson is an elementary particle which explains why other particles have mass. It was discovered in collision experiments in the LHC, where proton bunches are accelerated on a circular trajectory in both directions. The collisions between the protons are detected by sensors of the ATLAS detector which also detect particles resulting from those collisions, resulting in the real-valued variables which we are provided with. These sensors however detect either actual interesting events or uninteresting events. The end goal of this project is then to improve the classification of the signal / background events, given the real-valued features resulting from the collision event.
 
 \section{Models and Methods}
 \label{sec:structure-paper}
 
 \subsection{Data Exploration and Preprocessing}
-We also noticed that 15 \textcolor{red}{(Ce que moi j'ai mis. Apparemment vous en avez 12. A discuter) } out of the 30 available features included in the dataset seem to be power-law distributed. In order to compensate for the high skew of the observed distributions, we took the logarithm of these selected features instead of the actual features themselves (see Figure \ref{fig_kde}).
 The provided training dataset consists of a 250K samples corpus of collision events, where each event is classified as either signal $S$ or background $B$. Each collision is characterized by a set of 30 features from which the predictions will be made. A separate test set of unlabelled samples on which to test the performance of our models is also provided. \\
 A first glance at our dataset reveals that overall,
 more than 70\% of the events lack at least one feature, which is indicated in the data  by the value $-999$. These have to be imputed in order to be able to feed our dataset to a learning method. To handle this missing information we replaced the missing values of a given feature by its mean value, calculated separately for the training and the test set. \\
@@ -87,15 +86,14 @@ This in turn enabled us to further remove static features from the dataset, yiel
 \end{tabular}
 \end{table}
 
-Finally, the difference of the particle azimuthal angles $\Phi$, namely, \verb+PRI_tau_phi+, \verb+PRI_lep_phi+, \verb+PRI_met_phi+, were considered to be of potential interest  in determining the nature of the collision detected and were therefore added as features.
+Finally, the difference of the particle azimuthal angles $\Phi$, namely, \verb+PRI_tau_phi+, \verb+PRI_lep_phi+, \verb+PRI_met_phi+, were considered to be of potential interest  in determining the nature of the collision detected and were therefore added as features. \\
+Also, we found interesting to introduce non-linearities in our dataset by adding to our original data the  polynomial values of the features with degree less than or equal to $n$. This was then expanded to include the polynomial combinations of the features as well as the square root of their value. 
 
-Then, depending on the result of the grid search on the different methods and jets, we add a certain number $n$ of polynomial features from each initial feature. And then we build the cross terms of the base features, and add their $\sqrt{n}$ first polynomial features. Thus when the degree $n$ of the base features improves we still keep a descent proportion of cross terms.
+Thus when the degree $n$ of the base features improves we still keep a descent proportion of cross terms.
 
-\subsection{Different methods tested}
+\subsection{Learning methods considered}
 
-For each of the following algorithms we performed either a 4 or a 10 fold cross validation for each element in the grid search to check the robustness of our models.
-
-We made the choice to use the different methods following their number of meta parameters to keep an order of magnitude of the performances.
+We proceeded to compare the performance of different learning algorithms by using a grid search with either a 4- or 10- fold cross-validation on the model's parameters. Our choice of model was essentially motivated by considering the number of meta parameters defining each method in order to keep an order of magnitude on the performances: 
 
 \subsubsection{Least squares}
 
