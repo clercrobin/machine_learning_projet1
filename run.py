@@ -144,6 +144,9 @@ if __name__ == '__main__':
 
 	k_fold = 10
 
+	ids_ = []
+	pred_ = []
+
 	# We train a classifier for each "jet"
 	for i in range(2,-1,-1):
 		print("Jet: " + str(i))
@@ -185,6 +188,18 @@ if __name__ == '__main__':
 
 		# Prediction
 		y_jet_test_pred = predict_labels(w, x_jet_test_processed)
-	
-		create_csv_submission(ids_test[jet_mask_test], y_jet_test_pred, "submission" + str(i))
+
+		pred_.append(y_jet_test_pred)
+		ids_.append(ids_test[jet_mask_test])
+
+	with open("submission", 'w') as csvfile:
+		for i in range(3):
+			ids = ids_[i]
+			y_pred = pred_[i]
+			fieldnames = ['Id', 'Prediction']
+			writer = csv.DictWriter(csvfile, delimiter=",", fieldnames=fieldnames)
+			if i ==0:
+				writer.writeheader()
+			for r1, r2 in zip(ids, y_pred):
+				writer.writerow({'Id':int(r1),'Prediction':int(r2)})
 
