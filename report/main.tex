@@ -82,8 +82,8 @@ This in turn enabled us to further remove static features from the dataset, yiel
    \verb+PRI_jet_subleading_phi+  & * & * & /  \\
    \verb+PRI_jet_subleading_pt+  & * & * & /  \\
   \hline
-\label{tab_feats}
 \end{tabular}
+\label{tab_feats}
 \end{table}
 
 Finally, the difference of the particle azimuthal angles $\Phi$, namely, \verb+PRI_tau_phi+, \verb+PRI_lep_phi+, \verb+PRI_met_phi+, were considered to be of potential interest  in determining the nature of the collision detected and were therefore added as features. \\
@@ -91,52 +91,7 @@ Also, we found interesting to introduce non-linearities in our dataset by adding
 
 Thus when the degree $n$ of the base features improves we still keep a descent proportion of cross terms.
 
-\subsection{Learning methods considered}
-
-We proceeded to compare the performance of different learning algorithms by using a grid search with either a 4- or 10- fold cross-validation on the model's parameters. Our choice of model was essentially motivated by considering the number of meta parameters defining each method in order to keep an order of magnitude on the performances: 
-
-\subsubsection{Least squares}
-This model, when trained using its closed-formed solution, is parameter-free. We need only to choose the degree  up to which the polynomial features will be calculated. The optimal degree was obtained by grid-searching different values of $n$ ranging from 1 to 16 for each \verb+Jet+: 
-\begin{table}[h!]
-\centering
-\caption{Results of the grid search with cross terms \%)}
-\footnotesize
-\hspace{-0.2cm}
-\begin{tabular}{ l| ccc } 
- \hline
-   Jet & Degree & 10-fold Accuracy  \\
- \hline
-   \verb+Jet 0+  & 10 &  84.31 \\
-   \verb+Jet 1+  & 9 & 79.56 \\
-   \verb+Jet 2-3+  & 9 & 81.97 \\
-  \hline
-\label{grid_search_ridge_cross}
-\end{tabular}
-\end{table}
-
-\subsubsection{Ridge regression}
-The optimal parametrization of this model required us to grid-search over the degree of the polynomial to be applied as well as the $\lambda$ regularization term to penalize high values for the weights. The $\lambda$ parameter was sampled from ... and the degree $n$ was considered as in the previous case: 
-
-%As expected, it was not the same for the 3 sub categories. We got :
-\begin{table}[h!]
-\centering
-\caption{Results of the grid search with cross terms \%)}
-\footnotesize
-\hspace{-0.2cm}
-\begin{tabular}{ l| ccc } 
- \hline
-   Jet & Degree & Lambda & 10-fold Accuracy  \\
- \hline
-   \verb+Jet 0+  & 11 & $10^{-15}$  & 84.59  \\
-   \verb+Jet 1+  & 12 & $10^{-15}$  & 80.25 \\
-   \verb+Jet 2-3+  & 14  &  $10^{-13}$ & 82.62 \\
-  \hline
-\label{grid_search_ridge_cross}
-\end{tabular}
-\end{table}
-
-We find consistently greater performances across all different \verb+Jet+ values when adding the Tikhonov regularization term. It is worth noticing that, even with a small regularization term, this model allows for the adding of higher order polynomial features than least square without it leading necessarily to overfitting the training set. 
-
+\section{Results and Discussion}
 As shown, in Table \ref{tab_first_run}, the use of the  more sophisticated Newton based  gradient descent methods was hindered by the the non-invertible nature of the Hessian matrix. Instead of implementing quasi-Newton methods to work around this condition, we chose to focus on the three first models. Also, the gradient descent using the SGD variant with a batch size of 33\% of the training samples due to the high number of samples and features that were studied jointly. 
  
 \begin{table}[h!]
@@ -155,11 +110,52 @@ As shown, in Table \ref{tab_first_run}, the use of the  more sophisticated Newto
    \verb+log_regr_newton+  & / & / & / \\
    \verb+penal_log_regr_newton+ &  / & / & / \\
   \hline
-\label{tab_first_run}
 \end{tabular}
+\label{tab_first_run}
 \end{table}
 
-\section{Results and Discussion}
+
+We proceeded to compare the performance of different learning algorithms by using a grid search with either a 4- or 10- fold cross-validation on the model's parameters. Our choice of model was essentially motivated by considering the number of meta parameters defining each method in order to keep an order of magnitude on the performances: 
+
+\subsection{Least squares}
+This model, when trained using its closed-formed solution, is parameter-free. We need only to choose the degree  up to which the polynomial features will be calculated. The optimal degree was obtained by grid-searching different values of $n$ ranging from 1 to 16 for each \verb+Jet+: 
+\begin{table}[h!]
+\centering
+\caption{Least Square grid search with cross terms with cross terms }
+\footnotesize
+\begin{tabular}{|l| c|c| } 
+ \hline
+   Jet & Degree & 10-fold Accuracy (\%)  \\
+ \hline
+   \verb+Jet 0+  & 10 &  84.31 \\
+   \verb+Jet 1+  & 9 & 79.56 \\
+   \verb+Jet 2-3+  & 9 & 81.97\\
+  \hline
+\end{tabular}
+\label{grid_search_ridge_cross}
+\end{table}
+\subsection{Ridge regression}
+The optimal parametrization of this model required us to grid-search over the degree of the polynomial to be applied as well as the $\lambda$ regularization term to penalize high values for the weights. The $\lambda$ parameter was sampled from ... and the degree $n$ was considered as in the previous case: 
+
+%As expected, it was not the same for the 3 sub categories. We got :
+\begin{table}[h!]
+\centering
+\caption{Ridge regression Square grid search  with cross terms}
+\footnotesize
+\begin{tabular}{|l| cc|c| } 
+ \hline
+   Jet & Degree & Lambda & 10-fold Accuracy (\%)  \\
+ \hline
+   \verb+Jet 0+  & 11 & $10^{-15}$  & 84.59  \\
+   \verb+Jet 1+  & 12 & $10^{-15}$  & 80.25 \\
+   \verb+Jet 2-3+  & 14  &  $10^{-13}$ & 82.62 \\
+  \hline
+  \end{tabular}
+\label{grid_search_ridge_cross}
+\end{table}
+
+We find consistently greater performances across all different \verb+Jet+ values when adding the Tikhonov regularization term. It is worth noticing that, even with a small regularization term, this model allows for the adding of higher order polynomial features than least square without it leading necessarily to overfitting the training set. 
+
 
 \section{Conclusion}
 Classification tasks on complex datasets call for the use of different learning models to perform prediction. In this project a ridge regression model was implemented to classify detected collision events at CERN as signal or background. By preprocessing the data and grid-searching the best parameters , we acheived an accuracy of -\%. Several other approaches in the preprocessing and the model choice might have lead to greater scores such as using LASSO regularization or interpolating the missing features values from the present ones.
